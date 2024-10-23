@@ -1,5 +1,6 @@
 import random
 import string
+import os
 
 def generate_password(length=16, use_special_chars=False):
 	# Basic character set: digits and letters using string library
@@ -16,6 +17,13 @@ def generate_password(length=16, use_special_chars=False):
 		password += random.choice(characters) 
 
 	return password
+
+def get_desktop_path():
+	# Where your desktop is! In my case I use wsl and save to windows like this. 
+	# Change ~ to your username
+	home = os.path.expanduser("/mnt/c/Users/~")
+	desktop_path = os.path.join(home, "Desktop")
+	return desktop_path
 
 def get_user_input():
 	while True:
@@ -34,6 +42,12 @@ def get_user_input():
 
 			password = generate_password(length, use_special_chars)
 			print("Generated password:", password)
+
+			# File save part
+			desktop_path = get_desktop_path()
+			file_path = os.path.join(desktop_path, "passwords.txt")
+			with open(file_path, "a") as file:
+				file.write(password + "\n")
 			break
 
 		except ValueError as e:
