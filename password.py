@@ -18,16 +18,43 @@ def generate_password(length=16, use_special_chars=False):
 
 	return password
 
+def load_passwords(file_path):
+	passwords = {}
+	if os.path.exists(file_path):
+		with open(file_path, "r") as file:
+			for line in file:
+				key, password = line.strip().split(":")  # Splits keys and password by their ":" i.e "Steam:xxxxxxxx"
+				passwords[key] = password
+	return passwords
+
+def save_passwords(file_path, passwords):
+	with open(file_path, "w") as file:
+		for key, password in passwords.items():
+			file.write(f"{key}:{password}\n")
+
 def get_desktop_path():
 	# Where your desktop is! In my case I use wsl and save to windows like this. 
 	# Change ~ to your username
-	home = os.path.expanduser("/mnt/c/Users/~")
+	home = os.path.expanduser("/mnt/c/Users/ocelo")
 	desktop_path = os.path.join(home, "Desktop")
 	return desktop_path
 
 def get_user_input():
+	desktop_path = get_desktop_path()
+	file_path = os.path.join(desktop_path, "passwords.txt")
+
+	passwords = load_passwords(file_path)
+
 	while True:
 		try:
+			key = input("What is this password for?: ").strip()
+
+			if key in passwords:
+				overwrite = input(f"A password for '{key}' already exists, do you want to overwrite it? (y/n): ").strip().lower()
+				if overwrite != 'y':
+					print("Skipping password generation.")
+					break
+
 			length = int(input("Enter desired password length between 16-24: "))
 			if not 16 <= length <= 24:
 				raise ValueError("Password length must be between 16 and 24.")
@@ -43,11 +70,11 @@ def get_user_input():
 			password = generate_password(length, use_special_chars)
 			print("Generated password:", password)
 
-			# File save part
-			desktop_path = get_desktop_path()
-			file_path = os.path.join(desktop_path, "passwords.txt")
-			with open(file_path, "a") as file:
-				file.write(password + "\n")
+			passwords[key] = password
+
+			save_passwords(file_path, passwords)
+
+			print(f"Password for '{key}' saved to {file_path}")
 			break
 
 		except ValueError as e:
