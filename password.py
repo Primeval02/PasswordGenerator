@@ -19,15 +19,17 @@ def generate_password(length=16, use_special_chars=False):
 	return password
 
 def load_passwords(file_path):
+	# Gathers all current passwords saved in the txt file
 	passwords = {}
 	if os.path.exists(file_path):
 		with open(file_path, "r") as file:
 			for line in file:
 				key, password = line.strip().split(":")  # Splits keys and password by their ":" i.e "Steam:xxxxxxxx"
-				passwords[key] = password
+				passwords[key.lower()] = password  # Take the lowercase of the key, i.e. 'Steam' and 'steam' will be the same
 	return passwords
 
 def save_passwords(file_path, passwords):
+	# Saves the generated password to the text file
 	with open(file_path, "w") as file:
 		for key, password in passwords.items():
 			file.write(f"{key}:{password}\n")
@@ -35,7 +37,7 @@ def save_passwords(file_path, passwords):
 def get_desktop_path():
 	# Where your desktop is! In my case I use wsl and save to windows like this. 
 	# Change ~ to your username
-	home = os.path.expanduser("/mnt/c/Users/ocelo")
+	home = os.path.expanduser("/mnt/c/Users/~")
 	desktop_path = os.path.join(home, "Desktop")
 	return desktop_path
 
@@ -47,7 +49,7 @@ def get_user_input():
 
 	while True:
 		try:
-			key = input("What is this password for?: ").strip()
+			key = input("What is this password for?: ").strip().lower()
 
 			if key in passwords:
 				overwrite = input(f"A password for '{key}' already exists, do you want to overwrite it? (y/n): ").strip().lower()
@@ -70,8 +72,10 @@ def get_user_input():
 			password = generate_password(length, use_special_chars)
 			print("Generated password:", password)
 
+			# Save the password in the dictionary
 			passwords[key] = password
 
+			# Save the password to the file
 			save_passwords(file_path, passwords)
 
 			print(f"Password for '{key}' saved to {file_path}")
